@@ -1,5 +1,5 @@
 ﻿using System;
-using Content.Minesweeper;
+using Minesweeper;
 using TMPro;
 using UnityEngine;
 
@@ -27,7 +27,6 @@ public class MinesweeperRenderer : MonoBehaviour
         _hidden = new Transform[boardData.BoardHeight,boardData.BoardWidth];
         _cellControllers = new BoardCellController[boardData.BoardHeight,boardData.BoardWidth];
         
-        // Grid = new Grid_Old<Cell>(10, 10, 1, Vector3.zero, (Grid_Old<Cell> g, int x, int y) => new Cell(g, x, y));
         for (int y = 0; y < boardData.BoardHeight; y++)
         {
             for (int x = 0; x < boardData.BoardWidth; x++)
@@ -45,7 +44,6 @@ public class MinesweeperRenderer : MonoBehaviour
 
                 cell.transform.position = new Vector3( -boardData.BoardWidth * 0.5f + x,
                     -boardData.BoardHeight * 0.5f + y, 0);
-                //position logic
             }
         }
 
@@ -62,9 +60,6 @@ public class MinesweeperRenderer : MonoBehaviour
     public void OnClickCell(int x, int y, ClickType clickType)
     {
         OnSelectCell?.Invoke(x, y, clickType);
-        // manager.Reveal(x,y);
-        // Debug.Log($"select{x},{y}");
-        // if (DoSomething(board, x,y)) OnBoardChanged?.Invoke(board);
     }
 
     public void RenderBoard(BoardData boardData, MinesweeperCell[,] board)
@@ -75,9 +70,7 @@ public class MinesweeperRenderer : MonoBehaviour
             {
 
                 MinesweeperCell cell = board[y, x];
-
-                // Transform visualNode = visualNodeArray[y, x];
-                // visualNode.gameObject.SetActive(true);
+                
                 SetupVisualNode(cell, x, y);
             }
         }
@@ -87,11 +80,6 @@ public class MinesweeperRenderer : MonoBehaviour
     //TODO: Optimize
     private void SetupVisualNode(MinesweeperCell cell, int x, int y)
     {
-        // Should we cache all of these?
-        // SpriteRenderer iconSpriteRenderer = visualNodeTransform.Find("iconSprite").GetComponent<SpriteRenderer>();
-        // TextMesh indicatorText = visualNodeTransform.Find("mineIndicatorText").GetComponent<TextMesh>();
-        // Transform hiddenTransform = visualNodeTransform.Find("hiddenSprite");
-
         if (cell.IsRevealed || revealEntireMap)
         {
             // Node is revealed
@@ -124,8 +112,6 @@ public class MinesweeperRenderer : MonoBehaviour
         else
         {
             // Node is hidden
-
-
             if (cell.IsFlagged)
             {
                 _hidden[y, x].gameObject.SetActive(false);

@@ -4,24 +4,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public enum ClickType
+namespace Minesweeper
 {
-    LEFT,
-    WHEEL,
-    RIGHT,
-}
-
-public class BoardCellController : MonoBehaviour
-{
-    private int posX, posY;
-    public event Action<int, int, ClickType> OnClickCell = delegate{  };
-
-    public void Init(int x, int y)
+    public enum ClickType
     {
-        posX = x;
-        posY = y;
+        LEFT,
+        WHEEL,
+        RIGHT,
     }
 
-    public void OnClick(ClickType clickType) => OnClickCell(posX, posY, clickType);
+    public class BoardCellController : MonoBehaviour
+    {
+        private int posX, posY;
+        public event Action<int, int, ClickType> OnClickCell = delegate{  };
+
+        public void Init(int x, int y)
+        {
+            posX = x;
+            posY = y;
+        }
+
+        public void OnClick(ClickType clickType) => OnClickCell(posX, posY, clickType);
     
+    }
 }

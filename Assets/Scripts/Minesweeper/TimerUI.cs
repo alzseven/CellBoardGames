@@ -1,17 +1,19 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using TMPro;
 using UnityEngine;
 
-public class TimerUI : MonoBehaviour
+namespace Minesweeper
 {
-    public TMP_Text timerText;
-    public GameManager gameManager;
-
-    //TODO:Format String
-    private void Update()
+    public class TimerUI : MonoBehaviour
     {
-        if (timerText)
-            timerText.text = gameManager.gameTime.ToString(CultureInfo.CurrentCulture);
+        public TMP_Text timerText;
+        public GameManager gameManager;
+
+        //TODO:Format String
+        private void Update()
+        {
+            if (timerText)
+                timerText.text = gameManager.gameTime.ToString(CultureInfo.CurrentCulture);
+        }
     }
 }

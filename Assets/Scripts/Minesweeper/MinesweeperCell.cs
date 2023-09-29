@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Content.Minesweeper
+﻿namespace Minesweeper
 {
     public class MinesweeperCell
     {
