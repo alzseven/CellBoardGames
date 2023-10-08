@@ -7,13 +7,13 @@ namespace Minesweeper
     public class TimerUI : MonoBehaviour
     {
         public TMP_Text timerText;
-        public GameManager gameManager;
+        public MinesweeperGameManager minesweeperGameManager;
 
         //TODO:Format String
         private void Update()
         {
             if (timerText)
-                timerText.text = gameManager.gameTime.ToString(CultureInfo.CurrentCulture);
+                timerText.text = minesweeperGameManager.gameTime.ToString(CultureInfo.CurrentCulture);
         }
     }
 }
