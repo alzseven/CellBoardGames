@@ -1,51 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Minesweeper
 {
-    public class MinesweeperBoardManager : MonoBehaviour
+    public class MinesweeperBoardManager
     {
-        [SerializeField] private BoardData _boardData;
-        [SerializeField] private MinesweeperRenderer _msRenderer;
-        [SerializeField] private int _mineAmount;
+        public event Action<BoardData, MinesweeperCell[,]> OnBoardChanged;
+        public event Action<bool> OnGameEnded;
+        private readonly BoardData _boardData;
         private MinesweeperCell[,] _minesweeperBoard;
-
-
         private int _flagCount;
 
-        public bool isGameStarted;
 
-        private void Awake()
+        public MinesweeperBoardManager(BoardData boardData)
         {
+            _boardData = boardData;
             ClearGame();
         }
 
-        private void OnEnable()
-        {
-            _msRenderer.OnSelectCell += OnClickCell;
-        }
-
-        private void OnDisable()
-        {
-            _msRenderer.OnSelectCell -= OnClickCell;
-        }
-
-        private void Start()
-        {
-            _msRenderer.DrawBoard(_boardData);
-        
-        }
-    
         /// <summary>
-        /// Clears the game board.
-        /// Sets the game started flag to false and creates a new minesweeper board.
+        /// Creates a new minesweeper board with empty cells.
         /// </summary>
         private void ClearGame()
         {
-            // Set the game started flag to false.
-            isGameStarted = false;
-        
             // Create a new minesweeper board.
             _minesweeperBoard = new MinesweeperCell[_boardData.BoardHeight, _boardData.BoardWidth];
         
@@ -54,7 +33,10 @@ namespace Minesweeper
             {
                 for (int x = 0; x < _boardData.BoardWidth; x++)
                 {
-                    _minesweeperBoard[y, x] = new MinesweeperCell();
+                    _minesweeperBoard[y, x] = new MinesweeperCell(false,
+                        false,
+                        0,
+                        false);
                 }
             }
         }
@@ -69,46 +51,7 @@ namespace Minesweeper
             ClearGame();
         
             // Render the game board.
-            _msRenderer.RenderBoard(_boardData, _minesweeperBoard);
-        }
-    
-        /// <summary>
-        /// Handles a click on a cell in the game board.
-        /// </summary>
-        /// <param name="x">The x-coordinate of the clicked cell.</param>
-        /// <param name="y">The y-coordinate of the clicked cell.</param>
-        /// <param name="clickType">The type of click that was performed.</param>
-        private void OnClickCell(int x, int y, ClickType clickType)
-        {
-            switch (clickType)
-            {
-                case ClickType.LEFT:
-                    // Check if the game has started before planting mines
-                    // This prevents the player from accidentally planting mines
-                    // on the first click of the game
-                    if (!isGameStarted)
-                    {
-                        PlantMines(x, y, _mineAmount);
-                        isGameStarted = true;
-                    }
-                
-                    // Reveal the clicked cell
-                    RevealCell(x, y);
-                    break;
-                case ClickType.WHEEL:
-                    // Reveal all nearby cells
-                    RevealNearbyCells(x, y);
-                    break;
-                case ClickType.RIGHT:
-                    // Toggle the flag on the clicked cell
-                    ToggleFlag(x, y);
-                    break;
-                default:
-                    // Log an error if the click type is not recognized
-                    // TODO: Remove on build
-                    Debug.Log("Undefined Input");
-                    break;
-            }
+            OnBoardChanged?.Invoke(_boardData, _minesweeperBoard);
         }
 
         /// <summary>
@@ -117,7 +60,7 @@ namespace Minesweeper
         /// <param name="firstX"> The x-coordinate of the first cell. </param>
         /// <param name="firstY"> The y-coordinate of the first cell. </param>
         /// <param name="mineAmount"> The number of mines to plant. </param>
-        private void PlantMines(int firstX, int firstY, int mineAmount)
+        public void PlantMines(int firstX, int firstY, int mineAmount)
         {
             // Create a HashSet to keep track of which cells have already been mined.
             // This will prevent us from placing a mine on the same cell twice.
@@ -160,7 +103,7 @@ namespace Minesweeper
         /// </summary>
         /// <param name="x">The x-coordinate of the cell.</param>
         /// <param name="y">The y-coordinate of the cell.</param>
-        private void ToggleFlag(int x, int y)
+        public void ToggleFlag(int x, int y)
         {
             // Get the cell at the specified coordinates.
             MinesweeperCell cell = _minesweeperBoard[y, x];
@@ -175,7 +118,7 @@ namespace Minesweeper
             _flagCount = cell.IsFlagged ? _flagCount - 1 : _flagCount + 1;
         
             // Render the board.
-            _msRenderer.RenderBoard(_boardData, _minesweeperBoard);
+            OnBoardChanged?.Invoke(_boardData, _minesweeperBoard);
         }
 
         /// <summary>
@@ -183,7 +126,7 @@ namespace Minesweeper
         /// </summary>
         /// <param name="x"> The x-coordinate of the cell. </param>
         /// <param name="y"> The y-coordinate of the cell. </param>
-        private void RevealCell(int x, int y)
+        public void RevealCell(int x, int y)
         {
             MinesweeperCell cell = _minesweeperBoard[y, x];
 
@@ -195,7 +138,7 @@ namespace Minesweeper
             if (cell.IsMine)
             {
                 RevealWholeBoard(false);
-                //TODO: Game End!
+                OnGameEnded?.Invoke(false);
             }
             else
             {
@@ -216,11 +159,11 @@ namespace Minesweeper
             if (IsGameWon())
             {
                 RevealWholeBoard(true);
-                // TODO: Win
+                OnGameEnded?.Invoke(true);
             }
 
             // Render the board.
-            _msRenderer.RenderBoard(_boardData, _minesweeperBoard);
+            OnBoardChanged?.Invoke(_boardData, _minesweeperBoard);
         }
     
         /// <summary>
@@ -266,7 +209,7 @@ namespace Minesweeper
         /// </summary>
         /// <param name="centerX"> The x-coordinate of center cell. </param>
         /// <param name="centerY"> The y-coordinate of center cell. </param>
-        private void RevealNearbyCells(int centerX, int centerY)
+        public void RevealNearbyCells(int centerX, int centerY)
         {
             // Get the center cell.
             var centerCell = _minesweeperBoard[centerY, centerX];
@@ -293,7 +236,7 @@ namespace Minesweeper
             }
         
             // Render the minesweeper board.
-            _msRenderer.RenderBoard(_boardData, _minesweeperBoard);
+            OnBoardChanged?.Invoke(_boardData, _minesweeperBoard);
         }
     
         /// <summary>
@@ -386,7 +329,7 @@ namespace Minesweeper
             }
         
             // Render the game board.
-            _msRenderer.RenderBoard(_boardData, _minesweeperBoard);
+            OnBoardChanged?.Invoke(_boardData, _minesweeperBoard);
         }
     
     }

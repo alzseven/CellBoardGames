@@ -7,12 +7,12 @@
         public int NearbyMineCount;
         public bool IsFlagged;
 
-        public MinesweeperCell()
+        public MinesweeperCell(bool isMine, bool isRevealed, int nearbyMineCount, bool isFlagged)
         {
-            IsMine = false;
-            IsRevealed = false;
-            NearbyMineCount = 0;
-            IsFlagged = false;
+            IsMine = isMine;
+            IsRevealed = isRevealed;
+            NearbyMineCount = nearbyMineCount;
+            IsFlagged = isFlagged;
         }
     }
 }

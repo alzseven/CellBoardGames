@@ -12,19 +12,18 @@ namespace Minesweeper
         WHEEL,
         RIGHT,
     }
-
+    
     public class BoardCellController : MonoBehaviour
     {
         private int posX, posY;
-        public event Action<int, int, ClickType> OnClickCell = delegate{  };
-
+        public static event Action<int, int, ClickType> OnClickAnyCell = delegate {  };
+        
         public void Init(int x, int y)
         {
             posX = x;
             posY = y;
         }
 
-        public void OnClick(ClickType clickType) => OnClickCell(posX, posY, clickType);
-    
+        public void OnClick(ClickType clickType) => OnClickAnyCell(posX, posY, clickType);
     }
 }
